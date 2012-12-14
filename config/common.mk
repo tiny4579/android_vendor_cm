@@ -85,9 +85,12 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/etc/init.d/90userinit:system/etc/init.d/90userinit
 
+# CM-specific init file
+PRODUCT_COPY_FILES += \
+    vendor/cm/prebuilt/common/etc/init.local.rc:root/init.cm.rc
+
 # Compcache/Zram support
 PRODUCT_COPY_FILES += \
-    vendor/cm/prebuilt/common/etc/init.local.rc:system/etc/init.local.rc \
     vendor/cm/prebuilt/common/bin/compcache:system/bin/compcache \
     vendor/cm/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache
 
@@ -144,6 +147,7 @@ PRODUCT_PACKAGES += \
 #    audio_effects.conf \
 #    CMWallpapers \
 #    Apollo \
+    CMFileManager
 
 # Extra tools in CM
 PRODUCT_PACKAGES += \
@@ -180,7 +184,7 @@ PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/common
 
 PRODUCT_VERSION_MAJOR = 10
 PRODUCT_VERSION_MINOR = 0
-PRODUCT_VERSION_MAINTENANCE = 0-RC0
+PRODUCT_VERSION_MAINTENANCE = 0
 
 # Set CM_BUILDTYPE
 ifdef CM_NIGHTLY
@@ -215,3 +219,6 @@ endif
 PRODUCT_PROPERTY_OVERRIDES += \
   ro.cm.version=$(CM_VERSION) \
   ro.modversion=$(CM_VERSION)
+
+
+-include $(WORKSPACE)/hudson/image-auto-bits.mk
