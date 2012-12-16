@@ -141,13 +141,13 @@ PRODUCT_PACKAGES += \
 # Custom CM packages
 PRODUCT_PACKAGES += \
     Trebuchet \
-    CMUpdater
+#    CMUpdater
 #    DSPManager \
 #    libcyanogen-dsp \
 #    audio_effects.conf \
 #    CMWallpapers \
 #    Apollo \
-    CMFileManager
+#    CMFileManager
 
 # Extra tools in CM
 PRODUCT_PACKAGES += \
