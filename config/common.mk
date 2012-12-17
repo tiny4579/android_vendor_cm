@@ -142,12 +142,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     Trebuchet \
 #    CMUpdater
-#    DSPManager \
-#    libcyanogen-dsp \
-#    audio_effects.conf \
+    DSPManager \
+    libcyanogen-dsp \
+    audio_effects.conf \
 #    CMWallpapers \
-#    Apollo \
-#    CMFileManager
+    Apollo \
+    CMFileManager
 
 # Extra tools in CM
 PRODUCT_PACKAGES += \
