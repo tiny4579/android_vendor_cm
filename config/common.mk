@@ -99,6 +99,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/bin/modelid_cfg.sh:system/bin/modelid_cfg.sh
 
+# Terminal Emulator
+>>>>>>> upstream/cm-10.1
 PRODUCT_COPY_FILES +=  \
     vendor/cm/proprietary/Term.apk:system/app/Term.apk \
     vendor/cm/proprietary/lib/armeabi/libjackpal-androidterm4.so:system/lib/libjackpal-androidterm4.so
@@ -128,7 +130,6 @@ PRODUCT_PACKAGES += \
     Camera \
     Development \
     LatinIME \
-    SpareParts \
     Superuser \
     su
 
