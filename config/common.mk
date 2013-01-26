@@ -95,10 +95,6 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/bin/compcache:system/bin/compcache \
     vendor/cm/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache
 
-# Nam configuration script
-PRODUCT_COPY_FILES += \
-    vendor/cm/prebuilt/common/bin/modelid_cfg.sh:system/bin/modelid_cfg.sh
-
 # Terminal Emulator
 PRODUCT_COPY_FILES +=  \
     vendor/cm/proprietary/Term.apk:system/app/Term.apk \
@@ -148,6 +144,8 @@ PRODUCT_PACKAGES += \
     LockClock \
     libcyanogen-dsp \
     audio_effects.conf \
+    LiveWallpapersPicker \
+    PhaseBeam \
 #    CMWallpapers \
 #    CMUpdater \   
 
