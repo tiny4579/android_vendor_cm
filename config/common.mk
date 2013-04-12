@@ -161,6 +161,9 @@ PRODUCT_PACKAGES += \
 #    CMWallpapers \
 #    CMUpdater \   
 
+PRODUCT_PACKAGES += \
+    CellBroadcastReceiver
+
 # Extra tools in CM
 PRODUCT_PACKAGES += \
     openvpn \
