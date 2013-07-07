@@ -1,5 +1,6 @@
 PRODUCT_BRAND ?= cyanogenmod
 
+-include vendor/cm-priv/keys.mk
 SUPERUSER_EMBEDDED := true
 SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
 
@@ -199,7 +200,7 @@ PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/common
 
 PRODUCT_VERSION_MAJOR = 10
 PRODUCT_VERSION_MINOR = 1
-PRODUCT_VERSION_MAINTENANCE = 0-RC0
+PRODUCT_VERSION_MAINTENANCE = 1-RC0
 
 # Set CM_BUILDTYPE
 ifdef CM_NIGHTLY
@@ -216,6 +217,8 @@ ifdef CM_BUILDTYPE
     ifdef CM_EXTRAVERSION
         # Force build type to EXPERIMENTAL
         CM_BUILDTYPE := EXPERIMENTAL
+        # Remove leading dash from CM_EXTRAVERSION
+        CM_EXTRAVERSION := $(shell echo $(CM_EXTRAVERSION) | sed 's/-//')
         # Add leading dash to CM_EXTRAVERSION
         CM_EXTRAVERSION := -$(CM_EXTRAVERSION)
     endif
