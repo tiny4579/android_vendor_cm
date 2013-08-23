@@ -70,6 +70,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.com.android.dateformat=MM-dd-yyyy \
     ro.com.android.dataroaming=false
 
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.build.selinux=1 \
+    persist.sys.root_access=1
+
 ifneq ($(TARGET_BUILD_VARIANT),eng)
 # Enable ADB authentication
 ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
@@ -94,6 +98,10 @@ PRODUCT_COPY_FILES += \
 # userinit support
 PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/etc/init.d/90userinit:system/etc/init.d/90userinit
+
+# SELinux filesystem labels
+PRODUCT_COPY_FILES += \
+    vendor/cm/prebuilt/common/etc/init.d/50selinuxrelabel:system/etc/init.d/50selinuxrelabel
 
 # CM-specific init file
 PRODUCT_COPY_FILES += \
@@ -135,7 +143,7 @@ include vendor/cm/config/themes_common.mk
 
 # Required CM packages
 PRODUCT_PACKAGES += \
-    Camera \
+    Focal \
     Development \
     LatinIME \
     Superuser \
@@ -143,6 +151,8 @@ PRODUCT_PACKAGES += \
 
 # Optional CM packages
 PRODUCT_PACKAGES += \
+    VoicePlus \
+    VideoEditor \
     VoiceDialer \
     SoundRecorder
 #    VideoEditor \
@@ -162,6 +172,11 @@ PRODUCT_PACKAGES += \
 #    CMWallpapers \
 #    CMUpdater \   
 
+# CM Hardware Abstraction Framework
+PRODUCT_PACKAGES += \
+    org.cyanogenmod.hardware \
+    org.cyanogenmod.hardware.xml
+
 PRODUCT_PACKAGES += \
     CellBroadcastReceiver
 
@@ -176,7 +191,12 @@ PRODUCT_PACKAGES += \
     nano \
     htop \
     powertop \
-    lsof
+    lsof \
+    mount.exfat \
+    fsck.exfat \
+    mkfs.exfat \
+    ntfsfix \
+    ntfs-3g
 
 # Openssh
 PRODUCT_PACKAGES += \
@@ -192,15 +212,15 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     rsync
 
-# Don't grab all the languages for LatinIME
-#PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/dictionaries
-# Only grab EN dictionary
-PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/dictionaries/packages/inputmethods/LatinIME/java/res/raw/main_en.dict
+# easy way to extend to add more packages
+-include vendor/extra/product.mk
+
+PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/dictionaries
 PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/common
 
 PRODUCT_VERSION_MAJOR = 10
-PRODUCT_VERSION_MINOR = 1
-PRODUCT_VERSION_MAINTENANCE = 1-RC0
+PRODUCT_VERSION_MINOR = 2
+PRODUCT_VERSION_MAINTENANCE = 0-RC0
 
 # Set CM_BUILDTYPE
 ifdef CM_NIGHTLY
@@ -242,5 +262,5 @@ PRODUCT_PROPERTY_OVERRIDES += \
   ro.cm.version=$(CM_VERSION) \
   ro.modversion=$(CM_VERSION)
 
-
+-include vendor/cm/sepolicy/sepolicy.mk
 -include $(WORKSPACE)/hudson/image-auto-bits.mk
