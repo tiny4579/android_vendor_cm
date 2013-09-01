@@ -147,17 +147,17 @@ include vendor/cm/config/themes_common.mk
 
 # Required CM packages
 PRODUCT_PACKAGES += \
-    Focal \
-    Development \
+#    Focal \
+#    Development \
     LatinIME \
     Superuser \
     su
 
 # Optional CM packages
 PRODUCT_PACKAGES += \
-    VoicePlus \
-    VoiceDialer \
-    SoundRecorder
+#    VoicePlus \
+#    VoiceDialer \
+#    SoundRecorder
 #    VideoEditor \
 #    Basic
 
@@ -171,7 +171,7 @@ PRODUCT_PACKAGES += \
     audio_effects.conf \
     LiveWallpapersPicker \
     PhaseBeam \
-    CMAccount
+#    CMAccount
 #    CMFileManager \
 #    CMWallpapers \
 #    CMUpdater \   
