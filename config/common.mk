@@ -1,6 +1,5 @@
 PRODUCT_BRAND ?= cyanogenmod
 
--include vendor/cm-priv/keys.mk
 SUPERUSER_EMBEDDED := true
 SUPERUSER_PACKAGE_PREFIX := com.android.settings.cyanogenmod.superuser
 
@@ -70,8 +69,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.com.android.dataroaming=false
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.build.selinux=1 \
-    persist.sys.root_access=1
+    ro.build.selinux=1
 
 ifneq ($(TARGET_BUILD_VARIANT),eng)
 # Enable ADB authentication
@@ -83,11 +81,13 @@ PRODUCT_COPY_FILES += \
     vendor/cm/CHANGELOG.mkdn:system/etc/CHANGELOG-CM.txt
 
 # Backup Tool
+ifneq ($(WITH_GMS),true)
 PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/bin/backuptool.sh:system/bin/backuptool.sh \
     vendor/cm/prebuilt/common/bin/backuptool.functions:system/bin/backuptool.functions \
     vendor/cm/prebuilt/common/bin/50-cm.sh:system/addon.d/50-cm.sh \
     vendor/cm/prebuilt/common/bin/blacklist:system/addon.d/blacklist
+endif
 
 # init.d support
 PRODUCT_COPY_FILES += \
@@ -111,11 +111,6 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/bin/compcache:system/bin/compcache \
     vendor/cm/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache
 
-# Terminal Emulator
-#PRODUCT_COPY_FILES +=  \
-#    vendor/cm/proprietary/Term.apk:system/app/Term.apk \
-#    vendor/cm/proprietary/lib/armeabi/libjackpal-androidterm4.so:system/lib/libjackpal-androidterm4.so
-
 # Bring in camera effects
 PRODUCT_COPY_FILES +=  \
     vendor/cm/prebuilt/common/media/LMprec_508.emd:system/media/LMprec_508.emd \
@@ -133,10 +128,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/cm/config/permissions/com.cyanogenmod.android.xml:system/etc/permissions/com.cyanogenmod.android.xml
 
-# Don't export PS1 in /system/etc/mkshrc.
-PRODUCT_COPY_FILES += \
-    vendor/cm/prebuilt/common/etc/mkshrc:system/etc/mkshrc
-
 # T-Mobile theme engine
 include vendor/cm/config/themes_common.mk
 
@@ -144,9 +135,7 @@ include vendor/cm/config/themes_common.mk
 PRODUCT_PACKAGES += \
     Development \
     LatinIME \
-    Superuser \
-    BluetoothExt \
-    su
+    BluetoothExt
 
 # Optional CM packages
 PRODUCT_PACKAGES += \
@@ -166,7 +155,7 @@ PRODUCT_PACKAGES += \
     audio_effects.conf \
     LiveWallpapersPicker \
     PhaseBeam \
-#    CMAccount
+    CMAccount \
 #    CMFileManager \
 #    CMWallpapers \
 #    CMUpdater \   
@@ -195,7 +184,14 @@ PRODUCT_PACKAGES += \
     fsck.exfat \
     mkfs.exfat \
     ntfsfix \
-    ntfs-3g
+    ntfs-3g \
+    gdbserver \
+    micro_bench \
+    oprofiled \
+    procmem \
+    procrank \
+    sqlite3 \
+    strace
 
 # Openssh
 PRODUCT_PACKAGES += \
@@ -211,6 +207,31 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     rsync
 
+# These packages are excluded from user builds
+ifneq ($(TARGET_BUILD_VARIANT),user)
+
+PRODUCT_PACKAGES += \
+    CMUpdater \
+    Superuser \
+    su
+
+# Terminal Emulator
+PRODUCT_COPY_FILES +=  \
+    vendor/cm/proprietary/Term.apk:system/app/Term.apk \
+    vendor/cm/proprietary/lib/armeabi/libjackpal-androidterm4.so:system/lib/libjackpal-androidterm4.so
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.root_access=1
+else
+
+PRODUCT_PACKAGES += \
+    CMFota
+
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.root_access=0
+
+endif
+
 # easy way to extend to add more packages
 -include vendor/extra/product.mk
 
@@ -221,25 +242,41 @@ PRODUCT_VERSION_MAJOR = 10
 PRODUCT_VERSION_MINOR = 2
 PRODUCT_VERSION_MAINTENANCE = 0-RC0
 
-# Set CM_BUILDTYPE
-ifdef CM_NIGHTLY
-    CM_BUILDTYPE := NIGHTLY
+# Set CM_BUILDTYPE from the env RELEASE_TYPE, for jenkins compat
+
+ifndef CM_BUILDTYPE
+    ifdef RELEASE_TYPE
+        # Starting with "CM_" is optional
+        RELEASE_TYPE := $(shell echo $(RELEASE_TYPE) | sed -e 's|^CM_||g')
+        CM_BUILDTYPE := $(RELEASE_TYPE)
+    endif
 endif
-ifdef CM_EXPERIMENTAL
-    CM_BUILDTYPE := EXPERIMENTAL
-endif
-ifdef CM_RELEASE
-    CM_BUILDTYPE := RELEASE
+
+# Filter out random types, so it'll reset to UNOFFICIAL
+ifeq ($(filter RELEASE NIGHTLY SNAPSHOT EXPERIMENTAL,$(CM_BUILDTYPE)),)
+    CM_BUILDTYPE :=
 endif
 
 ifdef CM_BUILDTYPE
-    ifdef CM_EXTRAVERSION
-        # Force build type to EXPERIMENTAL
-        CM_BUILDTYPE := EXPERIMENTAL
-        # Remove leading dash from CM_EXTRAVERSION
-        CM_EXTRAVERSION := $(shell echo $(CM_EXTRAVERSION) | sed 's/-//')
-        # Add leading dash to CM_EXTRAVERSION
-        CM_EXTRAVERSION := -$(CM_EXTRAVERSION)
+    ifneq ($(CM_BUILDTYPE), SNAPSHOT)
+        ifdef CM_EXTRAVERSION
+            # Force build type to EXPERIMENTAL
+            CM_BUILDTYPE := EXPERIMENTAL
+            # Remove leading dash from CM_EXTRAVERSION
+            CM_EXTRAVERSION := $(shell echo $(CM_EXTRAVERSION) | sed 's/-//')
+            # Add leading dash to CM_EXTRAVERSION
+            CM_EXTRAVERSION := -$(CM_EXTRAVERSION)
+        endif
+    else
+        ifndef CM_EXTRAVERSION
+            # Force build type to EXPERIMENTAL, SNAPSHOT mandates a tag
+            CM_BUILDTYPE := EXPERIMENTAL
+        else
+            # Remove leading dash from CM_EXTRAVERSION
+            CM_EXTRAVERSION := $(shell echo $(CM_EXTRAVERSION) | sed 's/-//')
+            # Add leading dash to CM_EXTRAVERSION
+            CM_EXTRAVERSION := -$(CM_EXTRAVERSION)
+        endif
     endif
 else
     # If CM_BUILDTYPE is not defined, set to UNOFFICIAL
@@ -247,13 +284,13 @@ else
     CM_EXTRAVERSION :=
 endif
 
-ifdef CM_RELEASE
+ifeq ($(CM_BUILDTYPE), RELEASE)
     CM_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR).$(PRODUCT_VERSION_MAINTENANCE)$(PRODUCT_VERSION_DEVICE_SPECIFIC)-$(CM_BUILD)
 else
     ifeq ($(PRODUCT_VERSION_MINOR),0)
-        CM_VERSION := $(PRODUCT_VERSION_MAJOR)-$(shell date -u +%Y%m%d)-$(CM_BUILDTYPE)-$(CM_BUILD)$(CM_EXTRAVERSION)
+        CM_VERSION := $(PRODUCT_VERSION_MAJOR)-$(shell date -u +%Y%m%d)-$(CM_BUILDTYPE)$(CM_EXTRAVERSION)-$(CM_BUILD)
     else
-        CM_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(shell date -u +%Y%m%d)-$(CM_BUILDTYPE)-$(CM_BUILD)$(CM_EXTRAVERSION)
+        CM_VERSION := $(PRODUCT_VERSION_MAJOR).$(PRODUCT_VERSION_MINOR)-$(shell date -u +%Y%m%d)-$(CM_BUILDTYPE)$(CM_EXTRAVERSION)-$(CM_BUILD)
     endif
 endif
 
@@ -262,4 +299,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
   ro.modversion=$(CM_VERSION)
 
 -include vendor/cm/sepolicy/sepolicy.mk
+
+-include vendor/cm-priv/keys/keys.mk
+
 -include $(WORKSPACE)/hudson/image-auto-bits.mk
